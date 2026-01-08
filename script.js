@@ -124,13 +124,19 @@ class GitHubSync {
     }
 
     async downloadFromGist() {
+        console.log('downloadFromGist called');
+        
         if (!this.token) {
             throw new Error('GitHub token not set');
         }
 
+        console.log('Current gistId:', this.gistId);
+        
         // If we don't have a gist ID, try to find existing one
         if (!this.gistId) {
+            console.log('No gistId, searching for existing gist...');
             await this.findExistingGist();
+            console.log('After search, gistId:', this.gistId);
         }
 
         if (!this.gistId) {
@@ -801,28 +807,39 @@ class TaskTODOPlanner {
     }
 
     async handleSync() {
+        console.log('=== SYNC START ===');
+        
         if (!this.githubSync.hasToken()) {
+            console.log('No token found');
             this.showSettings();
             this.showNotification('Please set your GitHub token first', 'warning');
             return;
         }
-
+        
+        console.log('Token exists, starting sync...');
+        
         const syncBtn = document.getElementById('sync-btn');
         syncBtn.classList.add('syncing');
         syncBtn.title = 'Syncing...';
 
         try {
+            console.log('Attempting to download from gist...');
             // Always try to download first (this will find existing gists)
             try {
                 const cloudData = await this.githubSync.downloadFromGist();
+                console.log('Downloaded cloud data:', cloudData);
                 this.mergeTaskData(cloudData);
+                console.log('Merged data, current tasks:', this.tasks);
             } catch (downloadError) {
                 // If download fails (no gist exists), that's ok - we'll create one
-                console.log('No existing gist found, will create new one');
+                console.log('Download failed:', downloadError.message);
+                console.log('Will create new gist');
             }
             
+            console.log('Uploading current data:', this.tasks);
             // Upload current data
             await this.githubSync.createOrUpdateGist(this.tasks);
+            console.log('Upload successful!');
             this.showNotification('Tasks synced successfully!', 'success');
         } catch (error) {
             console.error('Sync error:', error);
@@ -830,6 +847,7 @@ class TaskTODOPlanner {
         } finally {
             syncBtn.classList.remove('syncing');
             syncBtn.title = 'Sync with GitHub';
+            console.log('=== SYNC END ===');
         }
     }
 
