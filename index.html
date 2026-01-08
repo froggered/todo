@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>todo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>todo</h1>
+            <nav>
+                <button class="tab-btn active" data-tab="personal">Personal</button>
+                <button class="tab-btn" data-tab="work">Work</button>
+            </nav>
+            <div class="sync-controls">
+                <button class="sync-btn" id="sync-btn" title="Sync with GitHub">☁</button>
+                <button class="settings-btn" id="settings-btn" title="Settings">⚙</button>
+            </div>
+        </header>
+
+        <div class="settings-modal" id="settings-modal">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h3>GitHub Sync Settings</h3>
+                    <button class="close-btn" id="close-settings">×</button>
+                </div>
+                <div class="settings-body">
+                    <label for="github-token">GitHub Personal Access Token:</label>
+                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    <div class="help-text">
+                        <p>To sync your todos across devices:</p>
+                        <ol>
+                            <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub → Settings → Developer settings → Personal access tokens</a></li>
+                            <li>Generate a new token with "gist" permissions</li>
+                            <li>Copy and paste the token above</li>
+                        </ol>
+                        <p><strong>Your token is stored locally and never shared.</strong></p>
+                    </div>
+                    <div class="settings-actions">
+                        <button id="save-token" class="save-btn">Save Token</button>
+                        <button id="clear-token" class="clear-btn">Clear Token</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <div class="tab-content active" id="personal">
+                <div class="day-selector">
+                    <button class="prev-day">&lt;</button>
+                    <button class="date-picker-btn" id="current-date"></button>
+                    <button class="next-day">&gt;</button>
+                    
+                    <div class="calendar-popup" id="calendar-popup">
+                        <div class="calendar-header">
+                            <button class="calendar-nav" id="prev-month">&lt;</button>
+                            <h3 id="calendar-month-year"></h3>
+                            <button class="calendar-nav" id="next-month">&gt;</button>
+                        </div>
+                        <div class="calendar-grid" id="calendar-grid">
+                            <div class="calendar-day-header">Sun</div>
+                            <div class="calendar-day-header">Mon</div>
+                            <div class="calendar-day-header">Tue</div>
+                            <div class="calendar-day-header">Wed</div>
+                            <div class="calendar-day-header">Thu</div>
+                            <div class="calendar-day-header">Fri</div>
+                            <div class="calendar-day-header">Sat</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="todo-section">
+                    <div class="add-todo">
+                        <input type="text" id="todo-input" placeholder="Add a new task...">
+                        <button id="add-btn">Add</button>
+                    </div>
+                    <ul id="todo-list" class="todo-list"></ul>
+                </div>
+            </div>
+
+            <div class="tab-content" id="work">
+                <div class="day-selector">
+                    <button class="prev-day">&lt;</button>
+                    <button class="date-picker-btn" id="current-date-work"></button>
+                    <button class="next-day">&gt;</button>
+                </div>
+                
+                <div class="todo-section">
+                    <div class="add-todo">
+                        <input type="text" id="todo-input-work" placeholder="Add a new work task...">
+                        <button id="add-btn-work">Add</button>
+                    </div>
+                    <ul id="todo-list-work" class="todo-list"></ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

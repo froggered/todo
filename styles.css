@@ -1,0 +1,782 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+    line-height: 1.5;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+}
+
+h1 {
+    color: #1a1a1a;
+    margin-bottom: 32px;
+    font-size: 2.25rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+}
+
+.sync-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    gap: 8px;
+}
+
+.sync-btn, .settings-btn {
+    background: #f8f8f8;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sync-btn:hover, .settings-btn:hover {
+    background: #e8e8e8;
+    color: #1a1a1a;
+    transform: translateY(-1px);
+}
+
+.sync-btn.syncing {
+    animation: spin 1s linear infinite;
+    background: #1a1a1a;
+    color: #fff;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    background: #f0f0f0;
+    padding: 4px;
+    border-radius: 12px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    border: none;
+    background: transparent;
+    color: #666;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.tab-btn.active {
+    background: #fff;
+    color: #1a1a1a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab-btn:hover:not(.active) {
+    color: #1a1a1a;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+
+.day-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+    position: relative;
+}
+
+.date-picker-btn {
+    color: #1a1a1a;
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+    font-family: inherit;
+}
+
+.date-picker-btn:hover {
+    background: #f8f8f8;
+}
+
+.prev-day, .next-day {
+    background: #f8f8f8;
+    color: #666;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.prev-day:hover, .next-day:hover {
+    background: #e8e8e8;
+    color: #1a1a1a;
+}
+
+.prev-day.drag-over, .next-day.drag-over {
+    background: #1a1a1a;
+    color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(26, 26, 26, 0.3);
+}
+
+.prev-day, .next-day {
+    position: relative;
+    overflow: visible;
+}
+
+.prev-day.drag-over::before, .next-day.drag-over::before {
+    content: "";
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px dashed #1a1a1a;
+    border-radius: 14px;
+    background: rgba(26, 26, 26, 0.1);
+}
+
+.calendar-popup {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    padding: 20px;
+    margin-top: 8px;
+    min-width: 280px;
+    display: none;
+}
+
+.calendar-popup.show {
+    display: block;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.calendar-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.calendar-nav {
+    background: #f8f8f8;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #666;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.calendar-nav:hover {
+    background: #e8e8e8;
+    color: #1a1a1a;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-day-header {
+    padding: 8px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.calendar-day {
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-day:hover {
+    background: #f8f8f8;
+}
+
+.calendar-day.today {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.calendar-day.today:hover {
+    background: #333;
+}
+
+.calendar-day.selected {
+    background: #e8e8e8;
+    font-weight: 600;
+}
+
+.calendar-day.other-month {
+    color: #ccc;
+}
+
+.settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.settings-modal.show {
+    display: flex;
+}
+
+.settings-content {
+    background: #fff;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.settings-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #f8f8f8;
+}
+
+.settings-body {
+    padding: 24px;
+}
+
+.settings-body label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.settings-body input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    font-family: inherit;
+}
+
+.settings-body input:focus {
+    outline: none;
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.05);
+}
+
+.help-text {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.help-text p {
+    margin: 0 0 12px 0;
+}
+
+.help-text p:last-child {
+    margin-bottom: 0;
+}
+
+.help-text ol {
+    margin: 12px 0;
+    padding-left: 20px;
+}
+
+.help-text a {
+    color: #1a1a1a;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.save-btn, .clear-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.save-btn {
+    background: #1a1a1a;
+    color: #fff;
+    flex: 1;
+}
+
+.save-btn:hover {
+    background: #333;
+}
+
+.clear-btn {
+    background: #f8f8f8;
+    color: #666;
+}
+
+.clear-btn:hover {
+    background: #e8e8e8;
+    color: #1a1a1a;
+}
+
+.notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 3000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background: #16a34a;
+}
+
+.notification.warning {
+    background: #ea580c;
+}
+
+.notification.error {
+    background: #dc2626;
+}
+
+.notification.info {
+    background: #1a1a1a;
+}
+
+.add-todo {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+#todo-input, #todo-input-work {
+    flex: 1;
+    padding: 16px 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+    background: #fff;
+    font-family: inherit;
+}
+
+#todo-input:focus, #todo-input-work:focus {
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.05);
+}
+
+#add-btn, #add-btn-work {
+    padding: 16px 24px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+#add-btn:hover, #add-btn-work:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.todo-list {
+    list-style: none;
+}
+
+.todo-item {
+    background: #fff;
+    padding: 20px 24px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    border: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.todo-item:hover {
+    border-color: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.todo-item {
+    cursor: grab;
+}
+
+.todo-item:active {
+    cursor: grabbing;
+}
+
+.todo-item.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+    z-index: 1000;
+}
+
+.todo-item.drag-over {
+    border-color: #1a1a1a;
+    border-style: dashed;
+    background: #f8f8f8;
+}
+
+.drag-handle {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+    color: #ccc;
+    cursor: grab;
+    padding: 4px;
+}
+
+.drag-handle:hover {
+    color: #666;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.todo-text.completed-today {
+    text-decoration: line-through;
+    color: #666;
+    text-decoration-color: #000;
+}
+
+.todo-text.completed-future {
+    text-decoration: line-through;
+    color: #666;
+    text-decoration-color: #e74c3c;
+}
+
+.todo-text.completed-early {
+    text-decoration: line-through;
+    color: #666;
+    text-decoration-color: #27ae60;
+}
+
+.todo-text.moved {
+    color: #999;
+    font-style: italic;
+}
+
+.todo-text.in-progress {
+    color: #ea580c;
+    font-weight: 500;
+}
+
+.todo-text.in-progress::before {
+    content: "⏳ ";
+    margin-right: 6px;
+}
+
+.todo-text.editable {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    outline: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+.todo-text.editable:focus {
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.05);
+}
+
+.todo-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+.complete-btn, .move-btn, .delete-btn, .edit-btn, .progress-btn, .uncomplete-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.complete-btn {
+    background: #f0f9f0;
+    color: #16a34a;
+}
+
+.complete-btn:hover {
+    background: #16a34a;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.move-btn {
+    background: #fef3e2;
+    color: #ea580c;
+}
+
+.move-btn:hover {
+    background: #ea580c;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.delete-btn {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.edit-btn {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.edit-btn:hover {
+    background: #6b7280;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.progress-btn {
+    background: #fef3e2;
+    color: #ea580c;
+}
+
+.progress-btn:hover {
+    background: #ea580c;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.uncomplete-btn {
+    background: #f0f9f0;
+    color: #16a34a;
+}
+
+.uncomplete-btn:hover {
+    background: #16a34a;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 24px 16px;
+    }
+    
+    header {
+        margin-bottom: 40px;
+    }
+    
+    h1 {
+        font-size: 1.875rem;
+        margin-bottom: 24px;
+    }
+    
+    nav {
+        width: 100%;
+    }
+    
+    .day-selector {
+        padding: 20px;
+        margin-bottom: 32px;
+    }
+    
+    .day-selector h2 {
+        font-size: 1rem;
+    }
+    
+    .add-todo {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    #add-btn, #add-btn-work {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .todo-item {
+        padding: 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .todo-actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-left: 0;
+    }
+}
