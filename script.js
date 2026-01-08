@@ -37,10 +37,14 @@ class GitHubSync {
             }
 
             const gists = await response.json();
+            console.log('Found gists:', gists.map(g => ({id: g.id, desc: g.description, files: Object.keys(g.files)})));
+            
             const todoGist = gists.find(gist => 
                 gist.description === 'Todo App Data Backup' && 
                 gist.files['todo-data.json']
             );
+
+            console.log('Todo gist found:', todoGist ? todoGist.id : 'none');
 
             if (todoGist) {
                 this.gistId = todoGist.id;
