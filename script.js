@@ -20,9 +20,49 @@ class GitHubSync {
         return !!this.token;
     }
 
+    async findExistingGist() {
+        if (!this.token) {
+            throw new Error('GitHub token not set');
+        }
+
+        try {
+            const response = await fetch('https://api.github.com/gists', {
+                headers: {
+                    'Authorization': `token ${this.token}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const gists = await response.json();
+            const todoGist = gists.find(gist => 
+                gist.description === 'Todo App Data Backup' && 
+                gist.files['todo-data.json']
+            );
+
+            if (todoGist) {
+                this.gistId = todoGist.id;
+                localStorage.setItem('todoGistId', this.gistId);
+                return todoGist.id;
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error finding existing gist:', error);
+            return null;
+        }
+    }
+
     async createOrUpdateGist(data) {
         if (!this.token) {
             throw new Error('GitHub token not set');
+        }
+
+        // If we don't have a gist ID, try to find existing one
+        if (!this.gistId) {
+            await this.findExistingGist();
         }
 
         const gistData = {
@@ -80,8 +120,17 @@ class GitHubSync {
     }
 
     async downloadFromGist() {
-        if (!this.token || !this.gistId) {
-            throw new Error('GitHub token or Gist ID not set');
+        if (!this.token) {
+            throw new Error('GitHub token not set');
+        }
+
+        // If we don't have a gist ID, try to find existing one
+        if (!this.gistId) {
+            await this.findExistingGist();
+        }
+
+        if (!this.gistId) {
+            throw new Error('No todo gist found');
         }
 
         try {
