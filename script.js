@@ -808,10 +808,13 @@ class TaskTODOPlanner {
         syncBtn.title = 'Syncing...';
 
         try {
-            if (this.githubSync.gistId) {
-                // Download and merge if gist exists
+            // Always try to download first (this will find existing gists)
+            try {
                 const cloudData = await this.githubSync.downloadFromGist();
                 this.mergeTaskData(cloudData);
+            } catch (downloadError) {
+                // If download fails (no gist exists), that's ok - we'll create one
+                console.log('No existing gist found, will create new one');
             }
             
             // Upload current data
