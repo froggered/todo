@@ -250,8 +250,12 @@ class TaskTODOPlanner {
         });
 
         // Sync functionality
-        document.getElementById('sync-btn').addEventListener('click', () => {
-            this.handleSync();
+        document.getElementById('download-btn').addEventListener('click', () => {
+            this.handleDownload();
+        });
+
+        document.getElementById('upload-btn').addEventListener('click', () => {
+            this.handleUpload();
         });
 
         document.getElementById('settings-btn').addEventListener('click', () => {
@@ -875,65 +879,62 @@ class TaskTODOPlanner {
         this.hideCalendar();
     }
 
-    async handleSync() {
+    async handleDownload() {
         if (!this.githubSync.hasToken()) {
             this.showSettings();
             this.showNotification('Please set your GitHub token first', 'warning');
             return;
         }
         
-        const syncBtn = document.getElementById('sync-btn');
-        syncBtn.classList.add('syncing');
-        syncBtn.title = 'Syncing...';
+        const downloadBtn = document.getElementById('download-btn');
+        downloadBtn.classList.add('downloading');
+        downloadBtn.title = 'Downloading...';
 
         try {
-            // Always try to download first (this will find existing gists)
-            try {
-                const cloudData = await this.githubSync.downloadFromGist();
-                this.mergeTaskData(cloudData);
-            } catch (downloadError) {
-                // If download fails (no gist exists), that's ok - we'll create one
-            }
+            const cloudData = await this.githubSync.downloadFromGist();
             
-            // Upload current data
-            await this.githubSync.createOrUpdateGist(this.tasks);
-            this.showNotification('Tasks synced successfully!', 'success');
+            // Replace local data completely with cloud data
+            this.tasks = cloudData;
+            this.saveTasks();
+            this.renderTasks();
+            
+            this.showNotification('Tasks downloaded from cloud!', 'success');
         } catch (error) {
-            console.error('Sync error:', error);
-            this.showNotification(`Sync failed: ${error.message}`, 'error');
+            console.error('Download error:', error);
+            if (error.message.includes('No todo gist found')) {
+                this.showNotification('No backup found in cloud', 'warning');
+            } else {
+                this.showNotification(`Download failed: ${error.message}`, 'error');
+            }
         } finally {
-            syncBtn.classList.remove('syncing');
-            syncBtn.title = 'Sync with GitHub';
+            downloadBtn.classList.remove('downloading');
+            downloadBtn.title = 'Download from GitHub';
         }
     }
 
-    mergeTaskData(cloudData) {
-        // Simple merge strategy: keep local data but add any cloud data that's newer
-        for (const category in cloudData) {
-            if (!this.tasks[category]) {
-                this.tasks[category] = {};
-            }
-            for (const date in cloudData[category]) {
-                if (!this.tasks[category][date]) {
-                    this.tasks[category][date] = cloudData[category][date];
-                } else {
-                    // Merge tasks by ID, keeping the newer ones
-                    const localTasks = this.tasks[category][date];
-                    const cloudTasks = cloudData[category][date];
-                    
-                    // Add any cloud tasks that don't exist locally
-                    cloudTasks.forEach(cloudTask => {
-                        const existsLocally = localTasks.some(localTask => localTask.id === cloudTask.id);
-                        if (!existsLocally) {
-                            localTasks.push(cloudTask);
-                        }
-                    });
-                }
-            }
+    async handleUpload() {
+        if (!this.githubSync.hasToken()) {
+            this.showSettings();
+            this.showNotification('Please set your GitHub token first', 'warning');
+            return;
         }
-        this.saveTasks();
-        this.renderTasks();
+        
+        const uploadBtn = document.getElementById('upload-btn');
+        uploadBtn.classList.add('uploading');
+        uploadBtn.title = 'Uploading...';
+
+        try {
+            await this.githubSync.createOrUpdateGist(this.tasks);
+            this.showNotification('Tasks backed up to cloud!', 'success');
+        } catch (error) {
+            console.error('Upload error:', error);
+            this.showNotification(`Upload failed: ${error.message}`, 'error');
+        } finally {
+            uploadBtn.classList.remove('uploading');
+            uploadBtn.title = 'Backup to GitHub';
+        }
     }
+
 
     showSettings() {
         const modal = document.getElementById('settings-modal');

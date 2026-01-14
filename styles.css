@@ -43,14 +43,14 @@ h1 {
     gap: 8px;
 }
 
-.sync-btn, .settings-btn {
+.download-btn, .upload-btn, .settings-btn {
     background: #f8f8f8;
     border: none;
     width: 40px;
     height: 40px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     color: #666;
     transition: all 0.2s ease;
     display: flex;
@@ -58,14 +58,20 @@ h1 {
     justify-content: center;
 }
 
-.sync-btn:hover, .settings-btn:hover {
+.download-btn:hover, .upload-btn:hover, .settings-btn:hover {
     background: #e8e8e8;
     color: #1a1a1a;
     transform: translateY(-1px);
 }
 
-.sync-btn.syncing {
-    animation: spin 1s linear infinite;
+.download-btn.downloading {
+    animation: pulse 1s ease-in-out infinite;
+    background: #16a34a;
+    color: #fff;
+}
+
+.upload-btn.uploading {
+    animation: pulse 1s ease-in-out infinite;
     background: #1a1a1a;
     color: #fff;
 }
@@ -73,6 +79,11 @@ h1 {
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
 }
 
 nav {
