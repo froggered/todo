@@ -168,6 +168,7 @@ class TaskTODOPlanner {
         this.tasks = this.loadTasks();
         this.draggedElement = null;
         this.draggedTaskId = null;
+        this.draggedTaskCategory = null;
         this.calendarDate = new Date();
         this.githubSync = new GitHubSync();
         
@@ -305,6 +306,42 @@ class TaskTODOPlanner {
 
             // Prevent the button's normal click behavior when dragging
             button.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+            });
+        });
+
+        // Set up drop zones for Personal/Work tabs
+        document.querySelectorAll('.tab-btn').forEach(tabBtn => {
+            tabBtn.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (this.draggedTaskId && this.draggedTaskCategory) {
+                    const targetCategory = tabBtn.dataset.tab;
+                    // Only show drop zone if dragging to different category
+                    if (targetCategory !== this.draggedTaskCategory) {
+                        tabBtn.classList.add('drag-over');
+                        e.dataTransfer.dropEffect = 'move';
+                    }
+                }
+            });
+
+            tabBtn.addEventListener('dragleave', (e) => {
+                tabBtn.classList.remove('drag-over');
+            });
+
+            tabBtn.addEventListener('drop', (e) => {
+                e.preventDefault();
+                tabBtn.classList.remove('drag-over');
+                
+                if (this.draggedTaskId && this.draggedTaskCategory) {
+                    const targetCategory = tabBtn.dataset.tab;
+                    // Only move if dropping on different category
+                    if (targetCategory !== this.draggedTaskCategory) {
+                        this.moveTaskBetweenCategories(this.draggedTaskCategory, targetCategory, this.draggedTaskId);
+                    }
+                }
+            });
+
+            tabBtn.addEventListener('dragenter', (e) => {
                 e.preventDefault();
             });
         });
@@ -509,6 +546,42 @@ class TaskTODOPlanner {
         }
     }
 
+    moveTaskBetweenCategories(fromCategory, toCategory, taskId) {
+        const dateKey = this.getDateKey();
+        const fromTasks = this.tasks[fromCategory][dateKey];
+        const taskIndex = fromTasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndex !== -1) {
+            const task = fromTasks[taskIndex];
+            
+            // Remove task from source category
+            fromTasks.splice(taskIndex, 1);
+            
+            // Add task to target category with new ID
+            const newTask = {
+                ...task,
+                id: Date.now(), // Generate new ID to avoid conflicts
+                moved: false // Reset moved status since it's a category change
+            };
+            
+            if (!this.tasks[toCategory]) {
+                this.tasks[toCategory] = {};
+            }
+            
+            if (!this.tasks[toCategory][dateKey]) {
+                this.tasks[toCategory][dateKey] = [];
+            }
+            
+            this.tasks[toCategory][dateKey].push(newTask);
+            this.saveTasks();
+            this.renderTasks();
+            
+            // Show notification about the move
+            const categoryNames = { personal: 'Personal', work: 'Work' };
+            this.showNotification(`Task moved to ${categoryNames[toCategory]}`, 'success');
+        }
+    }
+
     deleteTask(category, taskId) {
         const dateKey = this.getDateKey();
         const tasks = this.tasks[category][dateKey];
@@ -547,6 +620,7 @@ class TaskTODOPlanner {
         taskElement.addEventListener('dragstart', (e) => {
             this.draggedElement = taskElement;
             this.draggedTaskId = taskId;
+            this.draggedTaskCategory = this.currentTab;
             taskElement.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', taskElement.outerHTML);
@@ -556,13 +630,17 @@ class TaskTODOPlanner {
             taskElement.classList.remove('dragging');
             this.draggedElement = null;
             this.draggedTaskId = null;
+            this.draggedTaskCategory = null;
             
-            // Remove drag-over class from all items and calendar buttons
+            // Remove drag-over class from all items, calendar buttons, and tabs
             document.querySelectorAll('.todo-item').forEach(item => {
                 item.classList.remove('drag-over');
             });
             document.querySelectorAll('.prev-day, .next-day').forEach(button => {
                 button.classList.remove('drag-over');
+            });
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.classList.remove('drag-over');
             });
         });
         
