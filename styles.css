@@ -149,7 +149,7 @@ nav {
     font-size: 0.9rem;
 }
 
-/* Force Pool tab styling with higher specificity */
+/* Force Pool tab styling with higher specificity - Cache bust v2 */
 .tab-content#pool .add-todo #todo-input-pool {
     flex: 1;
     padding: 16px 20px;
