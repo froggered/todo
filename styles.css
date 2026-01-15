@@ -534,7 +534,7 @@ nav {
     margin-bottom: 32px;
 }
 
-#todo-input, #todo-input-work {
+#todo-input, #todo-input-work, #todo-input-pool {
     flex: 1;
     padding: 16px 20px;
     border: 1px solid #e0e0e0;
@@ -546,12 +546,12 @@ nav {
     font-family: inherit;
 }
 
-#todo-input:focus, #todo-input-work:focus {
+#todo-input:focus, #todo-input-work:focus, #todo-input-pool:focus {
     border-color: #1a1a1a;
     box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.05);
 }
 
-#add-btn, #add-btn-work {
+#add-btn, #add-btn-work, #add-btn-pool {
     padding: 16px 24px;
     background: #1a1a1a;
     color: #fff;
@@ -565,7 +565,7 @@ nav {
     font-family: inherit;
 }
 
-#add-btn:hover, #add-btn-work:hover {
+#add-btn:hover, #add-btn-work:hover, #add-btn-pool:hover {
     background: #333;
     transform: translateY(-1px);
 }
