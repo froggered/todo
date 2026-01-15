@@ -337,8 +337,7 @@ class TaskTODOPlanner {
                 if (this.draggedTaskId && this.draggedTaskCategory) {
                     const targetCategory = tabBtn.dataset.tab;
                     // Only show drop zone if dragging to different category
-                    // Don't allow dragging TO pool, only FROM pool
-                    if (targetCategory !== this.draggedTaskCategory && targetCategory !== 'pool') {
+                    if (targetCategory !== this.draggedTaskCategory) {
                         tabBtn.classList.add('drag-over');
                         e.dataTransfer.dropEffect = 'move';
                     }
@@ -356,10 +355,11 @@ class TaskTODOPlanner {
                 if (this.draggedTaskId && this.draggedTaskCategory) {
                     const targetCategory = tabBtn.dataset.tab;
                     // Only move if dropping on different category
-                    // Don't allow dragging TO pool, only FROM pool
-                    if (targetCategory !== this.draggedTaskCategory && targetCategory !== 'pool') {
+                    if (targetCategory !== this.draggedTaskCategory) {
                         if (this.draggedTaskCategory === 'pool') {
                             this.movePoolTaskToDate(targetCategory, this.draggedTaskId);
+                        } else if (targetCategory === 'pool') {
+                            this.moveTaskToPool(this.draggedTaskCategory, this.draggedTaskId);
                         } else {
                             this.moveTaskBetweenCategories(this.draggedTaskCategory, targetCategory, this.draggedTaskId);
                         }
@@ -780,6 +780,41 @@ class TaskTODOPlanner {
         }
     }
 
+    moveTaskToPool(fromCategory, taskId) {
+        const dateKey = this.getDateKey();
+        const fromTasks = this.tasks[fromCategory][dateKey];
+        const taskIndex = fromTasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndex !== -1) {
+            const task = fromTasks[taskIndex];
+            
+            // Remove from source category
+            fromTasks.splice(taskIndex, 1);
+            
+            // Add to pool with new ID
+            const newTask = {
+                ...task,
+                id: Date.now(),
+                originalDate: null, // Pool tasks don't have original dates
+                moved: false,
+                completed: false, // Reset completion status
+                status: task.status === 'completed' ? 'pending' : task.status, // Reset if completed
+                completedDate: null
+            };
+            
+            if (!this.tasks.pool) {
+                this.tasks.pool = [];
+            }
+            
+            this.tasks.pool.push(newTask);
+            this.saveTasks();
+            this.renderTasks();
+            
+            const categoryNames = { personal: 'Personal', work: 'Work' };
+            this.showNotification(`Task moved from ${categoryNames[fromCategory]} to Pool`, 'success');
+        }
+    }
+
     deleteTask(category, taskId) {
         if (category === 'pool') {
             const tasks = this.tasks.pool;
@@ -804,8 +839,14 @@ class TaskTODOPlanner {
     }
 
     reorderTasks(category, draggedTaskId, targetTaskId, insertBefore = true) {
-        const dateKey = this.getDateKey();
-        const tasks = this.tasks[category][dateKey];
+        let tasks;
+        
+        if (category === 'pool') {
+            tasks = this.tasks.pool;
+        } else {
+            const dateKey = this.getDateKey();
+            tasks = this.tasks[category][dateKey];
+        }
         
         const draggedIndex = tasks.findIndex(t => t.id === draggedTaskId);
         const targetIndex = tasks.findIndex(t => t.id === targetTaskId);
