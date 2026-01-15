@@ -149,6 +149,43 @@ nav {
     font-size: 0.9rem;
 }
 
+/* Force Pool tab styling with higher specificity */
+.tab-content#pool .add-todo #todo-input-pool {
+    flex: 1;
+    padding: 16px 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+    background: #fff;
+    font-family: inherit;
+}
+
+.tab-content#pool .add-todo #todo-input-pool:focus {
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.05);
+}
+
+.tab-content#pool .add-todo #add-btn-pool {
+    padding: 16px 24px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.tab-content#pool .add-todo #add-btn-pool:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
 .tab-content {
     display: none;
 }
