@@ -802,7 +802,7 @@ nav {
         gap: 12px;
     }
     
-    #add-btn, #add-btn-work {
+    #add-btn, #add-btn-work, #add-btn-pool {
         width: 100%;
         justify-content: center;
     }
