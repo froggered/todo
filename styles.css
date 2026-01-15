@@ -127,6 +127,28 @@ nav {
     box-shadow: 0 4px 12px rgba(26, 26, 26, 0.3);
 }
 
+.pool-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e5e5e5;
+}
+
+.pool-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.pool-header p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
 .tab-content {
     display: none;
 }

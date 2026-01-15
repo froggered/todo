@@ -208,6 +208,10 @@ class TaskTODOPlanner {
             this.addTask('work');
         });
 
+        document.getElementById('add-btn-pool').addEventListener('click', () => {
+            this.addPoolTask();
+        });
+
         // Enter key for adding tasks
         document.getElementById('todo-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.addTask('personal');
@@ -215,6 +219,10 @@ class TaskTODOPlanner {
         
         document.getElementById('todo-input-work').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.addTask('work');
+        });
+
+        document.getElementById('todo-input-pool').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.addPoolTask();
         });
 
         // Calendar functionality
@@ -302,9 +310,17 @@ class TaskTODOPlanner {
                 button.classList.remove('drag-over');
                 
                 if (this.draggedTaskId) {
-                    // Determine direction based on button class
-                    const daysOffset = button.classList.contains('prev-day') ? -1 : 1;
-                    this.moveTaskToDate(this.currentTab, this.draggedTaskId, daysOffset);
+                    if (this.draggedTaskCategory === 'pool') {
+                        // Move pool task to specific date
+                        const targetDate = new Date(this.currentDate);
+                        const daysOffset = button.classList.contains('prev-day') ? -1 : 1;
+                        targetDate.setDate(targetDate.getDate() + daysOffset);
+                        this.movePoolTaskToSpecificDate(this.draggedTaskId, targetDate);
+                    } else {
+                        // Normal date movement
+                        const daysOffset = button.classList.contains('prev-day') ? -1 : 1;
+                        this.moveTaskToDate(this.currentTab, this.draggedTaskId, daysOffset);
+                    }
                 }
             });
 
@@ -321,7 +337,8 @@ class TaskTODOPlanner {
                 if (this.draggedTaskId && this.draggedTaskCategory) {
                     const targetCategory = tabBtn.dataset.tab;
                     // Only show drop zone if dragging to different category
-                    if (targetCategory !== this.draggedTaskCategory) {
+                    // Don't allow dragging TO pool, only FROM pool
+                    if (targetCategory !== this.draggedTaskCategory && targetCategory !== 'pool') {
                         tabBtn.classList.add('drag-over');
                         e.dataTransfer.dropEffect = 'move';
                     }
@@ -339,8 +356,13 @@ class TaskTODOPlanner {
                 if (this.draggedTaskId && this.draggedTaskCategory) {
                     const targetCategory = tabBtn.dataset.tab;
                     // Only move if dropping on different category
-                    if (targetCategory !== this.draggedTaskCategory) {
-                        this.moveTaskBetweenCategories(this.draggedTaskCategory, targetCategory, this.draggedTaskId);
+                    // Don't allow dragging TO pool, only FROM pool
+                    if (targetCategory !== this.draggedTaskCategory && targetCategory !== 'pool') {
+                        if (this.draggedTaskCategory === 'pool') {
+                            this.movePoolTaskToDate(targetCategory, this.draggedTaskId);
+                        } else {
+                            this.moveTaskBetweenCategories(this.draggedTaskCategory, targetCategory, this.draggedTaskId);
+                        }
                     }
                 }
             });
@@ -422,7 +444,39 @@ class TaskTODOPlanner {
         input.value = '';
     }
 
+    addPoolTask() {
+        const input = document.getElementById('todo-input-pool');
+        const text = input.value.trim();
+        
+        if (!text) return;
+        
+        const task = {
+            id: Date.now(),
+            text: text,
+            status: 'pending',
+            completed: false,
+            completedDate: null,
+            moved: false,
+            originalDate: null // Pool tasks don't have an original date
+        };
+        
+        if (!this.tasks.pool) {
+            this.tasks.pool = [];
+        }
+        
+        this.tasks.pool.push(task);
+        this.saveTasks();
+        this.renderTasks();
+        
+        input.value = '';
+    }
+
     completeTask(category, taskId) {
+        if (category === 'pool') {
+            this.completePoolTask(taskId);
+            return;
+        }
+
         const dateKey = this.getDateKey();
         const tasks = this.tasks[category][dateKey];
         const task = tasks.find(t => t.id === taskId);
@@ -436,48 +490,120 @@ class TaskTODOPlanner {
         }
     }
 
-    uncompleteTask(category, taskId) {
-        const dateKey = this.getDateKey();
-        const tasks = this.tasks[category][dateKey];
-        const task = tasks.find(t => t.id === taskId);
+    completePoolTask(taskId) {
+        const poolTasks = this.tasks.pool;
+        const taskIndex = poolTasks.findIndex(t => t.id === taskId);
         
-        if (task) {
-            task.completed = false;
-            task.status = 'pending';
-            task.completedDate = null;
+        if (taskIndex !== -1) {
+            const task = poolTasks[taskIndex];
+            
+            // Remove from pool
+            poolTasks.splice(taskIndex, 1);
+            
+            // Add to today's personal tasks as completed
+            const dateKey = this.getDateKey();
+            const completedTask = {
+                ...task,
+                completed: true,
+                status: 'completed',
+                completedDate: dateKey,
+                originalDate: dateKey, // Set original date to today since it's being completed today
+                moved: false
+            };
+            
+            if (!this.tasks.personal[dateKey]) {
+                this.tasks.personal[dateKey] = [];
+            }
+            
+            this.tasks.personal[dateKey].push(completedTask);
             this.saveTasks();
             this.renderTasks();
+            
+            this.showNotification('Task completed and moved to today!', 'success');
+        }
+    }
+
+    uncompleteTask(category, taskId) {
+        if (category === 'pool') {
+            // Pool tasks shouldn't be in completed state, but handle just in case
+            const tasks = this.tasks.pool;
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task) {
+                task.completed = false;
+                task.status = 'pending';
+                task.completedDate = null;
+                this.saveTasks();
+                this.renderTasks();
+            }
+        } else {
+            const dateKey = this.getDateKey();
+            const tasks = this.tasks[category][dateKey];
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task) {
+                task.completed = false;
+                task.status = 'pending';
+                task.completedDate = null;
+                this.saveTasks();
+                this.renderTasks();
+            }
         }
     }
 
     toggleTaskInProgress(category, taskId) {
-        const dateKey = this.getDateKey();
-        const tasks = this.tasks[category][dateKey];
-        const task = tasks.find(t => t.id === taskId);
-        
-        if (task) {
-            if (task.status === 'in-progress') {
-                // Remove in progress status
-                task.status = 'pending';
-            } else if (task.status === 'pending') {
-                // Set to in progress
-                task.status = 'in-progress';
+        if (category === 'pool') {
+            const tasks = this.tasks.pool;
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task) {
+                if (task.status === 'in-progress') {
+                    task.status = 'pending';
+                } else if (task.status === 'pending') {
+                    task.status = 'in-progress';
+                }
+                task.completed = false;
+                this.saveTasks();
+                this.renderTasks();
             }
-            task.completed = false;
-            this.saveTasks();
-            this.renderTasks();
+        } else {
+            const dateKey = this.getDateKey();
+            const tasks = this.tasks[category][dateKey];
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task) {
+                if (task.status === 'in-progress') {
+                    task.status = 'pending';
+                } else if (task.status === 'pending') {
+                    task.status = 'in-progress';
+                }
+                task.completed = false;
+                this.saveTasks();
+                this.renderTasks();
+            }
         }
     }
 
     editTask(category, taskId, newText) {
-        const dateKey = this.getDateKey();
-        const tasks = this.tasks[category][dateKey];
-        const task = tasks.find(t => t.id === taskId);
-        
-        if (task && newText.trim()) {
-            task.text = newText.trim();
-            this.saveTasks();
-            this.renderTasks();
+        if (category === 'pool') {
+            const tasks = this.tasks.pool;
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task && newText.trim()) {
+                task.text = newText.trim();
+                this.saveTasks();
+                this.renderTasks();
+            }
+        } else {
+            const dateKey = this.getDateKey();
+            const tasks = this.tasks[category][dateKey];
+            const task = tasks.find(t => t.id === taskId);
+            
+            if (task && newText.trim()) {
+                task.text = newText.trim();
+                this.saveTasks();
+                this.renderTasks();
+            }
         }
     }
 
@@ -586,15 +712,94 @@ class TaskTODOPlanner {
         }
     }
 
-    deleteTask(category, taskId) {
-        const dateKey = this.getDateKey();
-        const tasks = this.tasks[category][dateKey];
-        const taskIndex = tasks.findIndex(t => t.id === taskId);
+    movePoolTaskToDate(targetCategory, taskId) {
+        const poolTasks = this.tasks.pool;
+        const taskIndex = poolTasks.findIndex(t => t.id === taskId);
         
         if (taskIndex !== -1) {
-            tasks.splice(taskIndex, 1);
+            const task = poolTasks[taskIndex];
+            
+            // Remove from pool
+            poolTasks.splice(taskIndex, 1);
+            
+            // Add to target category on current date
+            const dateKey = this.getDateKey();
+            const newTask = {
+                ...task,
+                id: Date.now(),
+                originalDate: dateKey,
+                moved: false
+            };
+            
+            if (!this.tasks[targetCategory]) {
+                this.tasks[targetCategory] = {};
+            }
+            
+            if (!this.tasks[targetCategory][dateKey]) {
+                this.tasks[targetCategory][dateKey] = [];
+            }
+            
+            this.tasks[targetCategory][dateKey].push(newTask);
             this.saveTasks();
             this.renderTasks();
+            
+            const categoryNames = { personal: 'Personal', work: 'Work' };
+            this.showNotification(`Task moved from Pool to ${categoryNames[targetCategory]} today`, 'success');
+        }
+    }
+
+    movePoolTaskToSpecificDate(taskId, targetDate) {
+        const poolTasks = this.tasks.pool;
+        const taskIndex = poolTasks.findIndex(t => t.id === taskId);
+        
+        if (taskIndex !== -1) {
+            const task = poolTasks[taskIndex];
+            
+            // Remove from pool
+            poolTasks.splice(taskIndex, 1);
+            
+            // Add to Personal category on target date
+            const targetDateKey = this.formatDateKey(targetDate);
+            const newTask = {
+                ...task,
+                id: Date.now(),
+                originalDate: targetDateKey,
+                moved: false
+            };
+            
+            if (!this.tasks.personal[targetDateKey]) {
+                this.tasks.personal[targetDateKey] = [];
+            }
+            
+            this.tasks.personal[targetDateKey].push(newTask);
+            this.saveTasks();
+            this.renderTasks();
+            
+            const dateStr = targetDate.toLocaleDateString();
+            this.showNotification(`Task moved from Pool to ${dateStr}`, 'success');
+        }
+    }
+
+    deleteTask(category, taskId) {
+        if (category === 'pool') {
+            const tasks = this.tasks.pool;
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            
+            if (taskIndex !== -1) {
+                tasks.splice(taskIndex, 1);
+                this.saveTasks();
+                this.renderTasks();
+            }
+        } else {
+            const dateKey = this.getDateKey();
+            const tasks = this.tasks[category][dateKey];
+            const taskIndex = tasks.findIndex(t => t.id === taskId);
+            
+            if (taskIndex !== -1) {
+                tasks.splice(taskIndex, 1);
+                this.saveTasks();
+                this.renderTasks();
+            }
         }
     }
 
@@ -677,13 +882,19 @@ class TaskTODOPlanner {
     }
 
     renderTasks() {
-        const dateKey = this.getDateKey();
-        const listId = this.currentTab === 'personal' ? 'todo-list' : 'todo-list-work';
+        let listId, tasks;
+        
+        if (this.currentTab === 'pool') {
+            listId = 'todo-list-pool';
+            tasks = this.tasks.pool || [];
+        } else {
+            const dateKey = this.getDateKey();
+            listId = this.currentTab === 'personal' ? 'todo-list' : 'todo-list-work';
+            tasks = this.tasks[this.currentTab]?.[dateKey] || [];
+        }
+        
         const list = document.getElementById(listId);
-        
         list.innerHTML = '';
-        
-        const tasks = this.tasks[this.currentTab]?.[dateKey] || [];
         
         tasks.forEach(task => {
             const li = document.createElement('li');
@@ -998,7 +1209,7 @@ class TaskTODOPlanner {
 
     loadTasks() {
         const stored = localStorage.getItem('taskTodoPlanner');
-        return stored ? JSON.parse(stored) : { personal: {}, work: {} };
+        return stored ? JSON.parse(stored) : { personal: {}, work: {}, pool: [] };
     }
 }
 

@@ -16,6 +16,7 @@
             <nav>
                 <button class="tab-btn active" data-tab="personal">Personal</button>
                 <button class="tab-btn" data-tab="work">Work</button>
+                <button class="tab-btn" data-tab="pool">Pool</button>
             </nav>
             <div class="sync-controls">
                 <button class="download-btn" id="download-btn" title="Download from GitHub">☁↓</button>
@@ -97,6 +98,21 @@
                         <button id="add-btn-work">Add</button>
                     </div>
                     <ul id="todo-list-work" class="todo-list"></ul>
+                </div>
+            </div>
+
+            <div class="tab-content" id="pool">
+                <div class="pool-header">
+                    <h2>Task Pool</h2>
+                    <p>General tasks not tied to a specific day</p>
+                </div>
+                
+                <div class="todo-section">
+                    <div class="add-todo">
+                        <input type="text" id="todo-input-pool" placeholder="Add a general task...">
+                        <button id="add-btn-pool">Add</button>
+                    </div>
+                    <ul id="todo-list-pool" class="todo-list"></ul>
                 </div>
             </div>
         </main>
