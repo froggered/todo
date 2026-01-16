@@ -403,10 +403,7 @@ class TaskTODOPlanner {
     }
 
     changeDate(days) {
-        console.log(`Changing date by ${days} days`);
-        console.log('Before:', this.currentDate.toDateString());
         this.currentDate.setDate(this.currentDate.getDate() + days);
-        console.log('After:', this.currentDate.toDateString());
         this.updateDateDisplay();
         this.renderTasks();
         this.updateHistoricalFact();
@@ -1282,7 +1279,27 @@ class TaskTODOPlanner {
             "1-13": ["27 BC: Roman Senate grants Octavian the title Augustus, beginning Roman Empire", "1898: Émile Zola publishes 'J'Accuse!' defending Alfred Dreyfus"],
             "1-14": ["1878: Alexander Graham Bell demonstrates the telephone to Queen Victoria", "1969: USS Enterprise nuclear aircraft carrier catches fire, killing 28"],
             "1-15": ["69 AD: Otho seizes power in Rome, beginning the Year of the Four Emperors", "1919: Great Molasses Flood in Boston kills 21 people"],
-            "1-16": ["27 BC: Gaius Octavius granted the title Augustus by Roman Senate", "1920: Prohibition begins in the United States with the Volstead Act"]
+            "1-16": ["27 BC: Gaius Octavius granted the title Augustus by Roman Senate", "1920: Prohibition begins in the United States with the Volstead Act"],
+            "1-17": ["1991: Operation Desert Storm begins as coalition forces attack Iraq", "1893: Queen Liliuokalani of Hawaii is overthrown by American businessmen"],
+            "1-18": ["1778: Captain Cook becomes first European to discover Hawaiian Islands", "1871: German Empire proclaimed at Versailles, unifying Germany"],
+            "1-19": ["1861: Georgia secedes from the Union, joining Confederate States", "1983: Apple Lisa computer released, first commercial computer with a GUI"],
+            "1-20": ["1265: First English Parliament called into session by Simon de Montfort", "1961: John F. Kennedy inaugurated as 35th President of the United States"],
+            "1-21": ["1793: King Louis XVI of France executed by guillotine", "1950: George Orwell publishes '1984'"],
+            "1-22": ["1901: Queen Victoria dies, ending the Victorian era", "1973: Roe v. Wade Supreme Court decision legalizes abortion in the US"],
+            "1-23": ["1556: Deadliest earthquake in history kills 830,000 in Shaanxi, China", "1960: Bathyscaphe Trieste reaches deepest point of Earth's oceans"],
+            "1-24": ["41 AD: Roman Emperor Caligula assassinated by Praetorian Guard", "1984: First Apple Macintosh computer goes on sale"],
+            "1-25": ["1890: Reporter Nellie Bly completes her around-the-world journey in 72 days", "1924: First Winter Olympics begin in Chamonix, France"],
+            "1-26": ["1788: First Fleet arrives in Australia, beginning European settlement", "1950: India becomes a republic and adopts its constitution"],
+            "1-27": ["1945: Soviet forces liberate Auschwitz concentration camp", "1967: Apollo 1 fire kills three astronauts during launch pad test"],
+            "1-28": ["814 AD: Charlemagne dies, ending his reign as Holy Roman Emperor", "1986: Space Shuttle Challenger explodes 73 seconds after launch"],
+            "1-29": ["1845: Edgar Allan Poe publishes 'The Raven'", "1919: 18th Amendment ratified, beginning Prohibition in the United States"],
+            "1-30": ["1649: King Charles I of England executed for treason", "1933: Adolf Hitler appointed Chancellor of Germany"],
+            "1-31": ["1606: Guy Fawkes executed for Gunpowder Plot against English Parliament", "1958: First U.S. satellite Explorer 1 launched into orbit"],
+            "2-1": ["1662: Chinese pirate Koxinga captures Taiwan from the Dutch", "1960: First lunch counter sit-in of the Civil Rights Movement begins"],
+            "2-2": ["1943: German forces surrender at Stalingrad, turning point of WWII", "1848: Treaty of Guadalupe Hidalgo ends Mexican-American War"],
+            "2-3": ["1451: Mehmed II begins siege of Constantinople", "1959: Buddy Holly, Ritchie Valens, and The Big Bopper die in plane crash"],
+            "2-4": ["1789: George Washington elected first President of the United States", "1945: Yalta Conference begins between Roosevelt, Churchill, and Stalin"],
+            "2-5": ["1631: Roger Williams arrives in Boston, later founds Rhode Island", "1958: Gamal Abdel Nasser and Nikita Khrushchev sign arms deal"]
         };
     }
 
@@ -1292,14 +1309,10 @@ class TaskTODOPlanner {
         const day = currentDate.getDate();
         const key = `${month}-${day}`;
         
-        console.log(`Updating historical fact for ${key}`, currentDate.toDateString());
-        
         const events = this.historicalEvents[key];
         if (events && events.length > 0) {
             // Pick a random event for this date
             const randomEvent = events[Math.floor(Math.random() * events.length)];
-            
-            console.log('Historical event:', randomEvent);
             
             // Update both personal and work history displays
             const historyElement = document.getElementById('historical-fact');
@@ -1311,8 +1324,6 @@ class TaskTODOPlanner {
             if (historyElementWork) {
                 historyElementWork.textContent = randomEvent;
             }
-        } else {
-            console.log('No events found for', key);
         }
     }
 
