@@ -182,6 +182,7 @@ class TaskTODOPlanner {
         this.updateDateDisplay();
         this.renderTasks();
         this.updateHistoricalFact();
+        this.initializeHistoryState();
     }
 
     setupEventListeners() {
@@ -1303,6 +1304,26 @@ class TaskTODOPlanner {
             if (historyElementWork) {
                 historyElementWork.textContent = randomEvent;
             }
+        }
+    }
+
+    initializeHistoryState() {
+        // Start with history sections collapsed
+        const content = document.getElementById('history-content');
+        const contentWork = document.getElementById('history-content-work');
+        const toggle = document.getElementById('history-toggle');
+        const toggleWork = document.getElementById('history-toggle-work');
+        
+        if (content) {
+            content.style.display = 'none';
+            toggle.textContent = '📖';
+            toggle.title = 'Show historical fact';
+        }
+        
+        if (contentWork) {
+            contentWork.style.display = 'none';
+            toggleWork.textContent = '📖';
+            toggleWork.title = 'Show historical fact';
         }
     }
 
