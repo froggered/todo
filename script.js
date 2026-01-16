@@ -171,6 +171,7 @@ class TaskTODOPlanner {
         this.draggedTaskCategory = null;
         this.calendarDate = new Date();
         this.githubSync = new GitHubSync();
+        this.historicalEvents = this.initHistoricalEvents();
         
         this.init();
     }
@@ -180,6 +181,7 @@ class TaskTODOPlanner {
         this.setupCalendarDropZones();
         this.updateDateDisplay();
         this.renderTasks();
+        this.updateHistoricalFact();
     }
 
     setupEventListeners() {
@@ -1246,6 +1248,44 @@ class TaskTODOPlanner {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+
+    initHistoricalEvents() {
+        return {
+            "1-1": ["49 BC: Julius Caesar crosses the Rubicon River, beginning the Roman Civil War", "1912: Republic of China established, ending over 2000 years of imperial rule"],
+            "1-2": ["1492: Granada falls to Spanish forces, completing the Reconquista", "1905: Russian Revolution of 1905 begins with Bloody Sunday massacre"],
+            "1-3": ["1521: Pope Leo X excommunicates Martin Luther", "1959: Alaska becomes the 49th U.S. state"],
+            "1-4": ["1643: Isaac Newton born, will revolutionize physics and mathematics", "1948: Burma gains independence from British Empire"],
+            "1-5": ["1066: Edward the Confessor dies, triggering succession crisis leading to Norman Conquest", "1895: Alfred Dreyfus publicly stripped of military rank in ceremony"],
+            "1-6": ["1838: Samuel Morse successfully tests the telegraph", "1912: Continental drift theory first presented by Alfred Wegener"],
+            "1-7": ["1610: Galileo discovers the four largest moons of Jupiter", "1929: Buck Rogers comic strip debuts, popularizing science fiction"],
+            "1-8": ["1297: Monaco gains independence from Genoa", "1935: Elvis Presley born in Tupelo, Mississippi"],
+            "1-9": ["1431: Judges' investigations for the trial of Joan of Arc begin", "1788: Connecticut becomes the 5th U.S. state"],
+            "1-10": ["49 BC: Julius Caesar crosses the Rubicon with his army", "1776: Thomas Paine publishes 'Common Sense'"],
+            "1-11": ["532: Nika riots begin in Constantinople, nearly toppling Emperor Justinian", "1922: Insulin first used to treat diabetes"],
+            "1-12": ["1904: Herero and Namaqua genocide begins in German Southwest Africa", "1969: Led Zeppelin I album released"],
+            "1-13": ["27 BC: Roman Senate grants Octavian the title Augustus, beginning Roman Empire", "1898: Émile Zola publishes 'J'Accuse!' defending Alfred Dreyfus"],
+            "1-14": ["1878: Alexander Graham Bell demonstrates the telephone to Queen Victoria", "1969: USS Enterprise nuclear aircraft carrier catches fire, killing 28"],
+            "1-15": ["69 AD: Otho seizes power in Rome, beginning the Year of the Four Emperors", "1919: Great Molasses Flood in Boston kills 21 people"],
+            "1-16": ["27 BC: Gaius Octavius granted the title Augustus by Roman Senate", "1920: Prohibition begins in the United States with the Volstead Act"]
+        };
+    }
+
+    updateHistoricalFact() {
+        const today = new Date();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+        const key = `${month}-${day}`;
+        
+        const events = this.historicalEvents[key];
+        if (events && events.length > 0) {
+            // Pick a random event for this date
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            const historyElement = document.getElementById('historical-fact');
+            if (historyElement) {
+                historyElement.textContent = randomEvent;
+            }
+        }
     }
 
     loadTasks() {
