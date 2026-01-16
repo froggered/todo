@@ -12,10 +12,6 @@
 <body>
     <div class="container">
         <header>
-            <div class="historical-section">
-                <span class="history-label">On This Day:</span>
-                <span id="historical-fact" class="historical-fact">Loading historical fact...</span>
-            </div>
             <h1>todo</h1>
             <nav>
                 <button class="tab-btn active" data-tab="personal">Personal</button>
@@ -79,6 +75,16 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="historical-section" id="historical-section">
+                    <div class="history-header" id="history-header">
+                        <span class="history-label">On This Day:</span>
+                        <button class="history-toggle" id="history-toggle" title="Toggle historical fact">📚</button>
+                    </div>
+                    <div class="history-content" id="history-content">
+                        <span id="historical-fact" class="historical-fact">Loading historical fact...</span>
+                    </div>
+                </div>
                 
                 <div class="todo-section">
                     <div class="add-todo">
@@ -94,6 +100,16 @@
                     <button class="prev-day">&lt;</button>
                     <button class="date-picker-btn" id="current-date-work"></button>
                     <button class="next-day">&gt;</button>
+                </div>
+
+                <div class="historical-section" id="historical-section-work">
+                    <div class="history-header" id="history-header-work">
+                        <span class="history-label">On This Day:</span>
+                        <button class="history-toggle" id="history-toggle-work" title="Toggle historical fact">📚</button>
+                    </div>
+                    <div class="history-content" id="history-content-work">
+                        <span id="historical-fact-work" class="historical-fact">Loading historical fact...</span>
+                    </div>
                 </div>
                 
                 <div class="todo-section">

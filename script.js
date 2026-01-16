@@ -290,6 +290,15 @@ class TaskTODOPlanner {
                 this.hideSettings();
             }
         });
+
+        // History toggle functionality
+        document.getElementById('history-toggle').addEventListener('click', () => {
+            this.toggleHistorySection();
+        });
+
+        document.getElementById('history-toggle-work').addEventListener('click', () => {
+            this.toggleHistorySection('work');
+        });
     }
 
     setupCalendarDropZones() {
@@ -396,6 +405,7 @@ class TaskTODOPlanner {
         this.currentDate.setDate(this.currentDate.getDate() + days);
         this.updateDateDisplay();
         this.renderTasks();
+        this.updateHistoricalFact();
     }
 
     updateDateDisplay() {
@@ -1131,6 +1141,7 @@ class TaskTODOPlanner {
         this.updateDateDisplay();
         this.renderTasks();
         this.hideCalendar();
+        this.updateHistoricalFact();
     }
 
     async handleDownload() {
@@ -1272,19 +1283,42 @@ class TaskTODOPlanner {
     }
 
     updateHistoricalFact() {
-        const today = new Date();
-        const month = today.getMonth() + 1;
-        const day = today.getDate();
+        const currentDate = this.currentDate; // Use the app's current date, not today
+        const month = currentDate.getMonth() + 1;
+        const day = currentDate.getDate();
         const key = `${month}-${day}`;
         
         const events = this.historicalEvents[key];
         if (events && events.length > 0) {
             // Pick a random event for this date
             const randomEvent = events[Math.floor(Math.random() * events.length)];
+            
+            // Update both personal and work history displays
             const historyElement = document.getElementById('historical-fact');
+            const historyElementWork = document.getElementById('historical-fact-work');
+            
             if (historyElement) {
                 historyElement.textContent = randomEvent;
             }
+            if (historyElementWork) {
+                historyElementWork.textContent = randomEvent;
+            }
+        }
+    }
+
+    toggleHistorySection(tab = 'personal') {
+        const suffix = tab === 'work' ? '-work' : '';
+        const content = document.getElementById(`history-content${suffix}`);
+        const toggle = document.getElementById(`history-toggle${suffix}`);
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '📚';
+            toggle.title = 'Hide historical fact';
+        } else {
+            content.style.display = 'none';
+            toggle.textContent = '📖';
+            toggle.title = 'Show historical fact';
         }
     }
 
