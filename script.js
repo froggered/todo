@@ -403,7 +403,10 @@ class TaskTODOPlanner {
     }
 
     changeDate(days) {
+        console.log(`Changing date by ${days} days`);
+        console.log('Before:', this.currentDate.toDateString());
         this.currentDate.setDate(this.currentDate.getDate() + days);
+        console.log('After:', this.currentDate.toDateString());
         this.updateDateDisplay();
         this.renderTasks();
         this.updateHistoricalFact();
@@ -1289,10 +1292,14 @@ class TaskTODOPlanner {
         const day = currentDate.getDate();
         const key = `${month}-${day}`;
         
+        console.log(`Updating historical fact for ${key}`, currentDate.toDateString());
+        
         const events = this.historicalEvents[key];
         if (events && events.length > 0) {
             // Pick a random event for this date
             const randomEvent = events[Math.floor(Math.random() * events.length)];
+            
+            console.log('Historical event:', randomEvent);
             
             // Update both personal and work history displays
             const historyElement = document.getElementById('historical-fact');
@@ -1304,6 +1311,8 @@ class TaskTODOPlanner {
             if (historyElementWork) {
                 historyElementWork.textContent = randomEvent;
             }
+        } else {
+            console.log('No events found for', key);
         }
     }
 
